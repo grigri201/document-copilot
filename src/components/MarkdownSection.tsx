@@ -53,7 +53,7 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
         onDoubleClick={handleDoubleClick}
         onBlur={handleBlur}
         onInput={handleInput}
-        className="border border-gray-300 rounded p-4 min-h-[200px] outline-none"
+        className="markdown border border-gray-300 rounded p-4 min-h-[200px] outline-none"
         dangerouslySetInnerHTML={!isEditing ? { __html: marked.parse(text) } : undefined}
       >
         {isEditing ? text : undefined}
