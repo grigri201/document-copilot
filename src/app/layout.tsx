@@ -26,12 +26,14 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <header className="flex justify-end p-4">
-          <Link href="/config" className="underline">
-            Config
-          </Link>
-        </header>
-        {children}
+        <div className="mx-auto w-[80vw] max-w-[1200px]">
+          <header className="flex justify-end p-4">
+            <Link href="/config" className="underline">
+              Config
+            </Link>
+          </header>
+          {children}
+        </div>
       </body>
     </html>
   );
