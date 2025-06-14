@@ -9,7 +9,9 @@ interface ArticleProps {
 
 
 export default function Article({ content }: ArticleProps) {
-  const sections = splitSections(content);
+  const sections = splitSections(content).filter(
+    (section) => section != null && section.trim() !== ""
+  );
   return (
     <div className="flex flex-col gap-4">
       {sections.map((section, idx) => (
