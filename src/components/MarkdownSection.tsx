@@ -53,15 +53,15 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
         onDoubleClick={handleDoubleClick}
         onBlur={handleBlur}
         onInput={handleInput}
-        className="markdown border border-gray-300 rounded p-4 min-h-[200px] outline-none"
+        className="markdown border border-gray-300 rounded-lg p-4 min-h-[200px] outline-none"
         dangerouslySetInnerHTML={!isEditing ? { __html: marked.parse(text) } : undefined}
       >
         {isEditing ? text : undefined}
       </div>
       {isEditing && (
         <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex w-[80%] items-center">
-          <input type="text" className="flex-grow bg-transparent border rounded p-2" />
-          <button className="ml-2 bg-blue-600 text-white rounded px-4 py-2">Send</button>
+          <input type="text" className="flex-grow bg-transparent border rounded-lg p-2" />
+          <button className="ml-2 bg-blue-600 text-white rounded-lg px-4 py-2">Send</button>
         </div>
       )}
     </div>

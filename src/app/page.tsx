@@ -21,8 +21,10 @@ code block
 
 export default function Home() {
   return (
-    <div className="relative min-h-screen p-4">
-      <Article content={sample} />
+    <div className="relative min-h-screen p-4 flex justify-center">
+      <div className="w-full max-w-2xl">
+        <Article content={sample} />
+      </div>
     </div>
   );
 }

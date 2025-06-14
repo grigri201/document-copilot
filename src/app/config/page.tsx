@@ -31,7 +31,7 @@ export default function ConfigPage() {
           <select
             value={provider}
             onChange={(e) => setProvider(e.target.value)}
-            className="border p-2 rounded"
+            className="border p-2 rounded-lg"
           >
             <option value="chatgpt">Use ChatGPT.com</option>
             <option value="openai">Use OpenAI API</option>
@@ -45,7 +45,7 @@ export default function ConfigPage() {
                 type="text"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                className="border p-2 rounded"
+                className="border p-2 rounded-lg"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -54,7 +54,7 @@ export default function ConfigPage() {
                 type="text"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
-                className="border p-2 rounded"
+                className="border p-2 rounded-lg"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -63,12 +63,12 @@ export default function ConfigPage() {
                 type="text"
                 value={baseUrl}
                 onChange={(e) => setBaseUrl(e.target.value)}
-                className="border p-2 rounded"
+                className="border p-2 rounded-lg"
               />
             </label>
           </>
         )}
-        <button onClick={save} className="bg-blue-600 text-white rounded py-2">
+        <button onClick={save} className="bg-blue-600 text-white rounded-lg py-2">
           Save
         </button>
       </div>
