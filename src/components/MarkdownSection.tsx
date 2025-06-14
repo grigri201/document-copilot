@@ -11,9 +11,13 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [text, setText] = useState(content);
   const divRef = useRef<HTMLDivElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const handleDoubleClick = () => {
     setIsEditing(true);
+    if (textareaRef.current) {
+      textareaRef.current.value = text;
+    }
     // focus the div after state update
     setTimeout(() => {
       divRef.current?.focus();
@@ -21,20 +25,34 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
   };
 
   const handleBlur = () => {
-    if (divRef.current) {
-      setText(divRef.current.innerText);
+    if (textareaRef.current) {
+      const newText = textareaRef.current.value;
+      setText(newText);
+      textareaRef.current.value = newText;
     }
     setIsEditing(false);
   };
 
+  const handleInput = () => {
+    if (divRef.current && textareaRef.current) {
+      textareaRef.current.value = divRef.current.innerText;
+    }
+  };
+
   return (
     <div className="relative">
+      <textarea
+        ref={textareaRef}
+        defaultValue={text}
+        className="hidden"
+      />
       <div
         ref={divRef}
         contentEditable={isEditing}
         suppressContentEditableWarning
         onDoubleClick={handleDoubleClick}
         onBlur={handleBlur}
+        onInput={handleInput}
         className="border border-gray-300 rounded p-4 min-h-[200px] outline-none"
         dangerouslySetInnerHTML={!isEditing ? { __html: marked.parse(text) } : undefined}
       >
