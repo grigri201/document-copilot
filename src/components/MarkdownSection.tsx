@@ -35,7 +35,7 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
         suppressContentEditableWarning
         onDoubleClick={handleDoubleClick}
         onBlur={handleBlur}
-        className="border border-gray-300 rounded p-4 min-h-[200px] outline-none"
+        className="markdown border border-gray-300 rounded p-4 min-h-[200px] outline-none"
         dangerouslySetInnerHTML={!isEditing ? { __html: marked.parse(text) } : undefined}
       >
         {isEditing ? text : undefined}
