@@ -27,8 +27,8 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
     }
   }, [isEditing]);
 
-  const commonClasses =
-    "border border-gray-200 rounded-lg p-4 min-h-[200px] outline-none w-full";
+  const baseClasses = "rounded-lg p-4 min-h-[200px] outline-none w-full";
+  const editingClasses = `border border-gray-200 ${baseClasses}`;
 
   return (
     <div className="relative">
@@ -38,12 +38,12 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
           value={text}
           onChange={(e) => setText(e.target.value)}
           onBlur={handleBlur}
-          className={commonClasses}
+          className={editingClasses}
         />
       ) : (
         <div
           onDoubleClick={handleDoubleClick}
-          className={`markdown ${commonClasses}`}
+          className={`markdown ${baseClasses}`}
           dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(text)) }}
         />
       )}
