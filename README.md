@@ -20,7 +20,7 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 ## Dependencies
 
-This project relies on [DOMPurify](https://github.com/cure53/DOMPurify) to sanitize HTML generated from markdown. Install dependencies with:
+This project relies on [DOMPurify](https://github.com/cure53/DOMPurify) to sanitize HTML generated from markdown. We use the [`isomorphic-dompurify`](https://github.com/kkomelin/isomorphic-dompurify) package so the same API works in both the browser and during server-side rendering. Install dependencies with:
 
 ```bash
 npm install
