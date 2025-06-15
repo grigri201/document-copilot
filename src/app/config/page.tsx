@@ -1,17 +1,22 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function ConfigPage() {
   const [provider, setProvider] = useState('chatgpt');
   const [apiKey, setApiKey] = useState('');
   const [model, setModel] = useState('');
   const [baseUrl, setBaseUrl] = useState('');
+  const [showSaved, setShowSaved] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setProvider(localStorage.getItem('api_provider') || 'chatgpt');
     setApiKey(localStorage.getItem('openai_api_key') || '');
     setModel(localStorage.getItem('openai_model') || '');
     setBaseUrl(localStorage.getItem('openai_base_url') || '');
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
   }, []);
 
   const save = () => {
@@ -19,7 +24,9 @@ export default function ConfigPage() {
     localStorage.setItem('openai_api_key', apiKey);
     localStorage.setItem('openai_model', model);
     localStorage.setItem('openai_base_url', baseUrl);
-    alert('Saved');
+    setShowSaved(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setShowSaved(false), 3000);
   };
 
   return (
@@ -30,7 +37,10 @@ export default function ConfigPage() {
           <span>Provider</span>
           <select
             value={provider}
-            onChange={(e) => setProvider(e.target.value)}
+            onChange={(e) => {
+              setProvider(e.target.value);
+              setShowSaved(false);
+            }}
             className="border p-2 rounded-lg"
           >
             <option value="chatgpt">Use ChatGPT.com</option>
@@ -44,7 +54,10 @@ export default function ConfigPage() {
               <input
                 type="text"
                 value={apiKey}
-                onChange={(e) => setApiKey(e.target.value)}
+                onChange={(e) => {
+                  setApiKey(e.target.value);
+                  setShowSaved(false);
+                }}
                 className="border p-2 rounded-lg"
               />
             </label>
@@ -53,7 +66,10 @@ export default function ConfigPage() {
               <input
                 type="text"
                 value={model}
-                onChange={(e) => setModel(e.target.value)}
+                onChange={(e) => {
+                  setModel(e.target.value);
+                  setShowSaved(false);
+                }}
                 className="border p-2 rounded-lg"
               />
             </label>
@@ -62,11 +78,19 @@ export default function ConfigPage() {
               <input
                 type="text"
                 value={baseUrl}
-                onChange={(e) => setBaseUrl(e.target.value)}
+                onChange={(e) => {
+                  setBaseUrl(e.target.value);
+                  setShowSaved(false);
+                }}
                 className="border p-2 rounded-lg"
               />
             </label>
           </>
+        )}
+        {showSaved && (
+          <div className="bg-green-100 border border-green-300 text-green-700 rounded-lg p-2 text-center">
+            Configuration saved
+          </div>
         )}
         <button onClick={save} className="bg-blue-600 text-white rounded-lg py-2">
           Save
