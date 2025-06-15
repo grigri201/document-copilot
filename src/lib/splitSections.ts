@@ -1,64 +1,33 @@
+import { Lexer } from 'marked';
+
 export default function splitSections(content: string): string[] {
+  const tokens = Lexer.lex(content);
   const sections: string[] = [];
-  const lines = content.split(/\r?\n/);
-  let i = 0;
 
-  const listRegex = /^\s*(?:[-+*]|\d+\.)\s+/;
-  const hrRegex = /^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/;
-  const quoteRegex = /^>/;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    // code block
-    if (/^```/.test(line)) {
-      const block: string[] = [line];
-      i++;
-      while (i < lines.length && !/^```/.test(lines[i])) {
-        block.push(lines[i]);
-        i++;
-      }
-      if (i < lines.length) {
-        block.push(lines[i]);
-        i++;
-      }
-      sections.push(block.join("\n"));
+  for (const token of tokens) {
+    if (token.type === 'space') {
+      sections.push('');
       continue;
     }
 
-    // block quote
-    if (quoteRegex.test(line)) {
-      const block: string[] = [line];
-      i++;
-      while (i < lines.length && quoteRegex.test(lines[i])) {
-        block.push(lines[i]);
-        i++;
+    let raw = token.raw as string;
+    const newlineMatch = raw.match(/(\r?\n)+$/);
+    if (newlineMatch) {
+      raw = raw.slice(0, -newlineMatch[0].length);
+    }
+
+    sections.push(raw);
+
+    if (newlineMatch) {
+      const newline = newlineMatch[0].replace(/\r/g, '');
+      const groups = Math.floor(newline.length / 2);
+      for (let i = 0; i < groups; i++) {
+        sections.push('');
       }
-      sections.push(block.join("\n"));
-      continue;
-    }
-
-    // list
-    if (listRegex.test(line)) {
-      const block: string[] = [line];
-      i++;
-      while (i < lines.length && listRegex.test(lines[i])) {
-        block.push(lines[i]);
-        i++;
+      if (newline.length % 2) {
+        sections.push('');
       }
-      sections.push(block.join("\n"));
-      continue;
     }
-
-    // horizontal rule
-    if (hrRegex.test(line)) {
-      sections.push(line);
-      i++;
-      continue;
-    }
-
-    sections.push(line);
-    i++;
   }
 
   return sections;

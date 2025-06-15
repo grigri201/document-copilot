@@ -35,4 +35,20 @@ code block
       ''
     ]);
   });
+
+  it('handles nested lists and multiple code blocks', () => {
+    const sample = `- item 1\n  - subitem 1\n  - subitem 2\n\n\`\`\`js\ncode1\n\`\`\`\n\nSome text.\n\n\`\`\`python\ncode2\n\`\`\`\n`;
+
+    const result = splitSections(sample);
+    expect(result).toEqual([
+      '- item 1\n  - subitem 1\n  - subitem 2',
+      '',
+      '```js\ncode1\n```',
+      '',
+      'Some text.',
+      '',
+      '```python\ncode2\n```',
+      ''
+    ]);
+  });
 });
