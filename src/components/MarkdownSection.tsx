@@ -28,7 +28,7 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
   }, [isEditing]);
 
   const commonClasses =
-    "border border-gray-300 rounded-lg p-4 min-h-[200px] outline-none w-full";
+    "border border-gray-200 rounded-lg p-4 min-h-[200px] outline-none w-full";
 
   return (
     <div className="relative">
@@ -48,9 +48,18 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
         />
       )}
       {isEditing && (
-        <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex w-[80%] items-center">
-          <input type="text" className="flex-grow bg-transparent border rounded-lg p-2" />
-          <button className="ml-2 bg-blue-600 text-white rounded-lg px-4 py-2">Send</button>
+        <div className="absolute bottom-2 left-0 right-0 px-4">
+          <div className="relative w-full">
+            <input
+              type="text"
+              className="w-full bg-transparent border border-gray-200 rounded-lg p-2 pr-20"
+            />
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white rounded-lg px-4 py-1.5"
+            >
+              Send
+            </button>
+          </div>
         </div>
       )}
     </div>
