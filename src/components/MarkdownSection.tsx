@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { marked } from "marked";
-import DOMPurify from "dompurify";
+import DOMPurify from "isomorphic-dompurify";
 
 interface MarkdownSectionProps {
   content: string;
