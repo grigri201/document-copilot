@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "dompurify": "^3.2.6",
     "marked": "^15.0.12",
     "next": "15.3.3",
     "react": "^19.0.0",
@@ -25,6 +26,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
     "jest": "^30.0.0",
+    "jsdom": "^26.1.0",
     "tailwindcss": "^4",
     "ts-jest": "^29.4.0",
     "typescript": "^5"

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { marked } from "marked";
+import DOMPurify from "dompurify";
 
 interface MarkdownSectionProps {
   content: string;
@@ -43,7 +44,7 @@ export default function MarkdownSection({ content }: MarkdownSectionProps) {
         <div
           onDoubleClick={handleDoubleClick}
           className={`markdown ${commonClasses}`}
-          dangerouslySetInnerHTML={{ __html: marked.parse(text) }}
+          dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(marked.parse(text)) }}
         />
       )}
       {isEditing && (
