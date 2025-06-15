@@ -5,6 +5,7 @@ import createDOMPurify from 'dompurify';
 describe('DOMPurify sanitization', () => {
   const window = new JSDOM('').window;
   // Assign global window before creating DOMPurify
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).window = window;
   const DOMPurify = createDOMPurify(window);
 
