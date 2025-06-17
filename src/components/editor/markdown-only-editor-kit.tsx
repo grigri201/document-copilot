@@ -21,6 +21,9 @@ import { AutoformatKit } from '@/components/editor/plugins/autoformat-kit';
 // AI features
 import { AIFloatingToolbarKit } from '@/components/editor/plugins/ai-floating-toolbar-kit';
 
+// Toolbar
+import { MarkdownToolbarKit } from '@/components/editor/plugins/markdown-toolbar-kit';
+
 /**
  * Markdown-only editor configuration
  * This configuration only supports markdown syntax without rich text editing
@@ -45,6 +48,9 @@ export const MarkdownOnlyEditorKit = [
   // UI enhancements
   ...CursorOverlayKit,
   ...BlockPlaceholderKit,
+  
+  // Toolbar
+  ...MarkdownToolbarKit,
   
   // AI features
   ...AIFloatingToolbarKit,

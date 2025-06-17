@@ -1,4 +1,4 @@
-export function editPrompt(currentContent: string, userRequest: string): string {
+export function editPrompt(fullContent: string, selectedContent: string, userPrompt: string): string {
   return `You are a **Document writing assistant**.
 
 - You will receive an **Original Document** and **User's writing requirements**.  
@@ -15,11 +15,15 @@ export function editPrompt(currentContent: string, userRequest: string): string 
 ## Input format
 
 \`\`\`
-content: 
-${currentContent}
+full content: 
+${fullContent}
 
 ===
-User's writing requirements: ${userRequest}
+User's writing requirements: ${userPrompt}
+
+===
+selected content:
+${selectedContent}
 \`\`\`
 
 ---

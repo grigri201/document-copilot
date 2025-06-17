@@ -13,12 +13,6 @@ export function PlateEditor() {
   const editor = usePlateEditor({
     plugins: MarkdownOnlyEditorKit,
     value,
-    override: {
-      components: {
-        // Disable all rich text toolbar buttons
-        toolbar: null,
-      },
-    },
   });
 
   return (

@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 
-import { WandSparklesIcon } from 'lucide-react';
+import { WandSparklesIcon, CopyIcon } from 'lucide-react';
 import { AIChatPlugin } from '@platejs/ai/react';
 import { MarkdownPlugin } from '@platejs/markdown';
 import { useEditorPlugin } from 'platejs/react';
@@ -10,6 +10,7 @@ import { useEditorPlugin } from 'platejs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Toolbar } from './toolbar';
+import { editPrompt } from '@/lib/prompts/editPrompt';
 
 export function AIFloatingToolbar({
   className,
@@ -43,34 +44,48 @@ export function AIFloatingToolbar({
     return 'Ask AI';
   }, [editor]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
-      // Store current selection before submitting
-      const currentSelection = editor.selection;
-      
-      // Get selected text
-      let selectedText = '';
-      if (editor.selection && editor.api.isExpanded()) {
-        selectedText = editor.api.string(editor.selection) || '';
-      }
-      
-      // Get whole content
-      const wholeContent = editor.getApi(MarkdownPlugin).markdown.serialize();
-      
-      // Print to console
-      console.log('=== AI Floating Toolbar Submission ===');
-      console.log('User Input:', input);
-      console.log('Selected Text:', selectedText);
-      console.log('Whole Content:', wholeContent);
-      console.log('=====================================');
-      
-      // Clear the input
-      setInput('');
-      
-      // Restore selection if it was lost
-      if (currentSelection && !editor.selection) {
-        editor.tf.select(currentSelection);
+      try {
+        // Get selected text
+        let selectedText = '';
+        if (editor.selection && editor.api.isExpanded()) {
+          selectedText = editor.api.string(editor.selection) || '';
+        }
+        
+        // Get whole content
+        const wholeContent = editor.getApi(MarkdownPlugin).markdown.serialize();
+        
+        // Format content with editPrompt
+        const formattedContent = editPrompt(wholeContent, selectedText, input.trim());
+        
+        // Copy to clipboard
+        await navigator.clipboard.writeText(formattedContent);
+        
+        // Open ChatGPT in new tab
+        window.open('https://chatgpt.com', '_blank');
+        
+        // Clear the input
+        setInput('');
+        
+        // Optional: Show success feedback
+        console.log('Content copied to clipboard and ChatGPT opened');
+      } catch (error) {
+        console.error('Error copying to clipboard:', error);
+        // Fallback: try using execCommand
+        const textarea = document.createElement('textarea');
+        textarea.value = editPrompt(
+          editor.getApi(MarkdownPlugin).markdown.serialize(),
+          editor.selection && editor.api.isExpanded() ? editor.api.string(editor.selection) || '' : '',
+          input.trim()
+        );
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        window.open('https://chatgpt.com', '_blank');
+        setInput('');
       }
     }
   };
@@ -140,7 +155,7 @@ export function AIFloatingToolbar({
         <Button
           type="submit"
           size="sm"
-          className="h-7 px-3"
+          className="h-7 px-3 flex items-center gap-1"
           disabled={!input.trim()}
           onMouseDown={(e) => {
             // Prevent default to maintain text selection
@@ -152,7 +167,8 @@ export function AIFloatingToolbar({
             e.preventDefault();
           }}
         >
-          Submit
+          <CopyIcon className="h-3 w-3" />
+          Copy
         </Button>
       </form>
     </Toolbar>
