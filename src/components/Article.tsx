@@ -1,22 +1,15 @@
 "use client";
 
-import MarkdownSection from "./MarkdownSection";
-import splitSections from "@/lib/splitSections";
-
 interface ArticleProps {
   content: string;
 }
 
-
 export default function Article({ content }: ArticleProps) {
-  const sections = splitSections(content).filter(
-    (section) => section != null && section.trim() !== ""
-  );
   return (
-    <div className="flex flex-col gap-4">
-      {sections.map((section, idx) => (
-        <MarkdownSection key={idx} content={section} />
-      ))}
+    <div className="flex flex-col">
+      <div className="prose prose-sm sm:prose lg:prose-lg xl:prose-xl mx-auto">
+        {content}
+      </div>
     </div>
   );
 }

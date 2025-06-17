@@ -1,5 +1,9 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export default function ConfigPage() {
   const [provider, setProvider] = useState('chatgpt');
@@ -31,71 +35,79 @@ export default function ConfigPage() {
 
   return (
     <div className="p-4 max-w-xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Configuration</h1>
-      <div className="flex flex-col gap-4">
-        <label className="flex flex-col gap-1">
-          <span>Provider</span>
-          <select
-            value={provider}
-            onChange={(e) => {
-              setProvider(e.target.value);
+      <Card>
+        <CardHeader>
+          <CardTitle>Configuration</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="provider">Provider</label>
+            <Select value={provider} onValueChange={(value) => {
+              setProvider(value);
               setShowSaved(false);
-            }}
-            className="border p-2 rounded-lg"
-          >
-            <option value="chatgpt">Use ChatGPT.com</option>
-            <option value="openai">Use OpenAI API</option>
-          </select>
-        </label>
+            }}>
+              <SelectTrigger id="provider">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="chatgpt">Use ChatGPT.com</SelectItem>
+                <SelectItem value="openai">Use OpenAI API</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         {provider === 'openai' && (
           <>
-            <label className="flex flex-col gap-1">
-              <span>OpenAI API Key</span>
-              <input
+            <div className="flex flex-col gap-2">
+              <label htmlFor="api-key">OpenAI API Key</label>
+              <Input
+                id="api-key"
                 type="text"
                 value={apiKey}
                 onChange={(e) => {
                   setApiKey(e.target.value);
                   setShowSaved(false);
                 }}
-                className="border p-2 rounded-lg"
+                placeholder="sk-..."
               />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span>OpenAI Model</span>
-              <input
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="model">OpenAI Model</label>
+              <Input
+                id="model"
                 type="text"
                 value={model}
                 onChange={(e) => {
                   setModel(e.target.value);
                   setShowSaved(false);
                 }}
-                className="border p-2 rounded-lg"
+                placeholder="gpt-4"
               />
-            </label>
-            <label className="flex flex-col gap-1">
-              <span>OpenAI Base URL</span>
-              <input
+            </div>
+            <div className="flex flex-col gap-2">
+              <label htmlFor="base-url">OpenAI Base URL</label>
+              <Input
+                id="base-url"
                 type="text"
                 value={baseUrl}
                 onChange={(e) => {
                   setBaseUrl(e.target.value);
                   setShowSaved(false);
                 }}
-                className="border p-2 rounded-lg"
+                placeholder="https://api.openai.com/v1"
               />
-            </label>
+            </div>
           </>
         )}
-        {showSaved && (
-          <div className="bg-green-100 border border-green-300 text-green-700 rounded-lg p-2 text-center">
-            Configuration saved
-          </div>
-        )}
-        <button onClick={save} className="bg-blue-600 text-white rounded-lg py-2">
-          Save
-        </button>
-      </div>
+          {showSaved && (
+            <div className="bg-green-50 border border-green-200 text-green-800 rounded-md p-3 text-center text-sm">
+              Configuration saved
+            </div>
+          )}
+          <Button onClick={save} className="w-full">
+            Save
+          </Button>
+        </CardContent>
+      </Card>
     </div>
   );
 }
