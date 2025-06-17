@@ -4,7 +4,6 @@ import * as React from 'react';
 
 import type { DropdownMenuProps } from '@radix-ui/react-dropdown-menu';
 
-import { MarkdownPlugin } from '@platejs/markdown';
 import { ArrowDownToLineIcon } from 'lucide-react';
 import { createSlateEditor, serializeHtml } from 'platejs';
 import { useEditorRef } from 'platejs/react';
@@ -20,6 +19,7 @@ import { BaseEditorKit } from '@/components/editor/editor-base-kit';
 
 import { EditorStatic } from './editor-static';
 import { ToolbarButton } from './toolbar';
+import { plateToMarkdown } from '@/lib/plateToMarkdown';
 
 const siteUrl = 'https://platejs.org';
 
@@ -141,7 +141,7 @@ export function ExportToolbarButton(props: DropdownMenuProps) {
   };
 
   const exportToMarkdown = async () => {
-    const md = editor.getApi(MarkdownPlugin).markdown.serialize();
+    const md = plateToMarkdown(editor.children);
     const url = `data:text/markdown;charset=utf-8,${encodeURIComponent(md)}`;
     await downloadFile(url, 'plate.md');
   };

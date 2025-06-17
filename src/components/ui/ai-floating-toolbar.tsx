@@ -4,13 +4,13 @@ import * as React from 'react';
 
 import { WandSparklesIcon, CopyIcon } from 'lucide-react';
 import { AIChatPlugin } from '@platejs/ai/react';
-import { MarkdownPlugin } from '@platejs/markdown';
 import { useEditorPlugin } from 'platejs/react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Toolbar } from './toolbar';
 import { editPrompt } from '@/lib/prompts/editPrompt';
+import { plateToMarkdown } from '@/lib/plateToMarkdown';
 
 export function AIFloatingToolbar({
   className,
@@ -54,8 +54,8 @@ export function AIFloatingToolbar({
           selectedText = editor.api.string(editor.selection) || '';
         }
         
-        // Get whole content
-        const wholeContent = editor.getApi(MarkdownPlugin).markdown.serialize();
+        // Get whole content using custom serializer
+        const wholeContent = plateToMarkdown(editor.children);
         
         // Format content with editPrompt
         const formattedContent = editPrompt(wholeContent, selectedText, input.trim());
@@ -76,7 +76,7 @@ export function AIFloatingToolbar({
         // Fallback: try using execCommand
         const textarea = document.createElement('textarea');
         textarea.value = editPrompt(
-          editor.getApi(MarkdownPlugin).markdown.serialize(),
+          plateToMarkdown(editor.children),
           editor.selection && editor.api.isExpanded() ? editor.api.string(editor.selection) || '' : '',
           input.trim()
         );
