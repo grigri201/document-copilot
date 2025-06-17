@@ -10,7 +10,7 @@ export const AIFloatingToolbarKit = [
     key: 'ai-floating-toolbar',
     render: {
       afterEditable: () => (
-        <FloatingToolbar>
+        <FloatingToolbar className='bg-white'>
           <AIFloatingToolbar />
         </FloatingToolbar>
       ),
