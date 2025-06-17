@@ -5,19 +5,30 @@ import * as React from 'react';
 import { Plate, usePlateEditor } from 'platejs/react';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 
-import { EditorKit } from '@/components/editor/editor-kit';
+// Use markdown-only editor for pure markdown editing
+import { MarkdownOnlyEditorKit } from '@/components/editor/markdown-only-editor-kit';
 import { SettingsDialog } from '@/components/editor/settings-dialog';
 
 export function PlateEditor() {
   const editor = usePlateEditor({
-    plugins: EditorKit,
+    plugins: MarkdownOnlyEditorKit,
     value,
+    override: {
+      components: {
+        // Disable all rich text toolbar buttons
+        toolbar: null,
+      },
+    },
   });
 
   return (
     <Plate editor={editor}>
       <EditorContainer>
-        <Editor variant="demo" placeholder="try ask AI to write something" />
+        <Editor 
+          variant="demo" 
+          placeholder="Type in markdown..." 
+          className="markdown-only"
+        />
       </EditorContainer>
 
       <SettingsDialog />
