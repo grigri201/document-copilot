@@ -44,3 +44,7 @@ npm run test         # Run Jest unit tests
 - Tailwind CSS with CSS variables for theming
 - Component composition using shadcn/ui primitives
 - Markdown styles defined globally in src/app/globals.css
+
+## Important Rules
+
+- **DO NOT MODIFY** any files in the `src/components` directory. These components are stable and should not be changed.
