@@ -5,8 +5,8 @@ import { ClipboardPasteIcon } from 'lucide-react';
 import { useEditorRef } from 'platejs/react';
 import { MarkdownPlugin } from '@platejs/markdown';
 import { ToolbarButton } from '@/components/ui/toolbar';
-import { applyDiff } from '@/lib/applyDiff';
-import { plateToMarkdown } from '@/lib/plateToMarkdown';
+import { applyDiff } from '@/lib/apply-diff';
+import { plateToMarkdown } from '@/lib/plate-to-markdown';
 
 export function PasteToolbarButton() {
   const editor = useEditorRef();

@@ -9,8 +9,8 @@ import { useEditorPlugin } from 'platejs/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Toolbar } from './toolbar';
-import { editPrompt } from '@/lib/prompts/editPrompt';
-import { plateToMarkdown } from '@/lib/plateToMarkdown';
+import { editPrompt } from '@/lib/prompts/edit-prompt';
+import { plateToMarkdown } from '@/lib/plate-to-markdown';
 
 export function AIFloatingToolbar({
   className,

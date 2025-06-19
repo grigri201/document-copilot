@@ -19,7 +19,7 @@ import { BaseEditorKit } from '@/components/editor/editor-base-kit';
 
 import { EditorStatic } from './editor-static';
 import { ToolbarButton } from './toolbar';
-import { plateToMarkdown } from '@/lib/plateToMarkdown';
+import { plateToMarkdown } from '@/lib/plate-to-markdown';
 
 const siteUrl = 'https://platejs.org';
 
