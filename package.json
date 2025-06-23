@@ -9,6 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "@udecode/plate-basic-marks": "^48.0.0",
+    "@udecode/plate-code-block": "^48.0.0",
+    "@udecode/plate-common": "^41.0.13",
+    "@udecode/plate-markdown": "^48.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "lucide-react": "^0.522.0",
@@ -16,6 +21,8 @@
     "platejs": "^49.0.6",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "slate": "^0.117.0",
+    "slate-react": "^0.117.1",
     "tailwind-merge": "^3.3.1"
   },
   "devDependencies": {
