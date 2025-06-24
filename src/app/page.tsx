@@ -11,6 +11,7 @@ import { FloatingInputBar } from '@/components/floating-input-bar';
 import { EditorToolbar } from '@/components/editor-toolbar';
 import { DiffBlockPlugin, DiffBlockComponent, ELEMENT_DIFF_BLOCK, type DiffBlockElement } from '@/lib/diff-plugin';
 import { parseDiff } from '@/lib/diff-parser';
+import { generatePrompt } from '@/lib/prompts';
 
 export default function MyEditorPage() {
   const editorRef = useRef<any>(null);
@@ -49,43 +50,7 @@ export default function MyEditorPage() {
       return '';
     }).filter(line => line !== '').join('\n');
 
-    const promptTemplate = `You are an expert editorial assistant.
-
-TASK
-• Take the current Markdown document (between <<<DOC_START … DOC_END>>>).
-• Apply the user's instruction (between <<<INSTRUCTION … INSTRUCTION_END>>>).
-• Return the result as a **unified‑diff patch**.
-
-STRICT DIFF FORMAT
-1. Show **exactly one** unchanged context line **above and below** every contiguous change block.
-2. Prefix:  
-   • unchanged context → " " (single space)  
-   • deletions         → "-"  
-   • additions         → "+"  
-3. No other commentary, headings, or fences—**only the diff lines**.
-
-EXAMPLE  
-Before:
-A  
-B  
-C  
-
-Instruction: replace "B" with "B2"  
-Return:
- A  
--B  
-+B2  
- C  
-
-DOCUMENT
-<<<DOC_START
-${content}
-DOC_END>>>
-
-INSTRUCTION
-<<<INSTRUCTION
-${question}
-INSTRUCTION_END>>>`;
+    const promptTemplate = generatePrompt(content, question);
 
     // Copy to clipboard
     navigator.clipboard.writeText(promptTemplate);
