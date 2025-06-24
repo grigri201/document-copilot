@@ -56,7 +56,7 @@ export default function MyEditorPage() {
     navigator.clipboard.writeText(promptTemplate);
     
     // Open ChatGPT in new tab
-    window.open('https://chat.openai.com', '_blank');
+    window.open('https://chatgpt.com', '_blank');
   };
 
   const handlePaste = useCallback(async () => {
