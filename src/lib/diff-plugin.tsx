@@ -1,10 +1,12 @@
 import { createPlatePlugin } from 'platejs/react';
 import { DiffBlock } from '@/components/diff-block';
 import type { DiffHunk } from './diff-parser';
+import type { PlateRenderElementProps } from '@/types/editor';
+import type { TElement } from '@udecode/plate-common';
 
-export const ELEMENT_DIFF_BLOCK = 'diff-block';
+export const ELEMENT_DIFF_BLOCK = 'diff-block' as const;
 
-export interface DiffBlockElement {
+export interface DiffBlockElement extends TElement {
   type: typeof ELEMENT_DIFF_BLOCK;
   hunk: DiffHunk;
   children: [{ text: '' }];
@@ -18,25 +20,25 @@ export const DiffBlockPlugin = createPlatePlugin({
   },
 });
 
-export function DiffBlockComponent({ element, attributes, children, editor }: any) {
+export function DiffBlockComponent({ element, attributes, children, editor }: PlateRenderElementProps) {
   const handleAccept = () => {
     // This will be implemented in the main component
-    if (editor && (editor as any).diffHandlers?.onAccept) {
-      (editor as any).diffHandlers.onAccept(element);
+    if (editor && editor.diffHandlers?.onAccept) {
+      editor.diffHandlers.onAccept(element as DiffBlockElement);
     }
   };
   
   const handleReject = () => {
     // This will be implemented in the main component
-    if (editor && (editor as any).diffHandlers?.onReject) {
-      (editor as any).diffHandlers.onReject(element);
+    if (editor && editor.diffHandlers?.onReject) {
+      editor.diffHandlers.onReject(element as DiffBlockElement);
     }
   };
   
   return (
     <div {...attributes} contentEditable={false} style={{ userSelect: 'none' }}>
       <DiffBlock
-        hunk={element.hunk}
+        hunk={(element as DiffBlockElement).hunk}
         onAccept={handleAccept}
         onReject={handleReject}
       />

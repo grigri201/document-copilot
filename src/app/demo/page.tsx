@@ -5,6 +5,7 @@ import { useDocumentEditor } from '@/hooks/useDocumentEditor';
 import { useDiffHandlers } from '@/hooks/useDiffHandlers';
 import { useClipboardHandlers } from '@/hooks/useClipboardHandlers';
 import { EditorLayout } from '@/components/layouts/EditorLayout';
+import type { CustomValue } from '@/types/editor';
 
 const DEMO_CONTENT = `今天也是和平的一天，飞天小女警要去上学了。清晨阳光透过窗帘，把木质课桌镀上一层金边。
 花花抱着科学书，泡泡踮脚塞储物柜，毛毛绕操场飞两圈才落地。
@@ -20,8 +21,8 @@ const DEMO_INSERTION_DIFF = `花花抱着科学书，泡泡踮脚塞储物柜，
 刚坐定，警报器尖锐响起——恶霸猴闯入市政厅偷市长的午餐券。她们对视一眼，书包还没放好便旋转变身。`;
 
 export default function DemoPage() {
-  const initialValue = DEMO_CONTENT.split('\n').map(line => ({
-    type: 'p',
+  const initialValue: CustomValue = DEMO_CONTENT.split('\n').map(line => ({
+    type: 'p' as const,
     children: [{ text: line }]
   }));
 

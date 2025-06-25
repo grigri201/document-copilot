@@ -10,13 +10,14 @@ import {
 } from '@udecode/plate-basic-marks/react';
 import { DiffBlockPlugin, DiffBlockComponent, ELEMENT_DIFF_BLOCK } from '@/lib/diff-plugin';
 import { useRef, useEffect } from 'react';
+import type { CustomEditor, CustomValue, CustomElement } from '@/types/editor';
 
 interface UseDocumentEditorOptions {
-  initialValue?: any[];
+  initialValue?: CustomValue;
 }
 
 export function useDocumentEditor(options: UseDocumentEditorOptions = {}) {
-  const editorRef = useRef<any>(null);
+  const editorRef = useRef<CustomEditor | null>(null);
   
   const editor = usePlateEditor({
     plugins: [
@@ -35,7 +36,7 @@ export function useDocumentEditor(options: UseDocumentEditorOptions = {}) {
       },
     },
     value: options.initialValue,
-  });
+  }) as unknown as CustomEditor;
 
   // Store editor ref when it's available
   useEffect(() => {
@@ -46,11 +47,11 @@ export function useDocumentEditor(options: UseDocumentEditorOptions = {}) {
 
   // Extract content from editor
   const getContent = () => {
-    return editor.children.map((node: any) => {
+    return editor.children.map((node: CustomElement) => {
       if (node.type === 'p' && node.children) {
-        return node.children.map((child: any) => child.text || '').join('');
+        return node.children.map((child) => child.text || '').join('');
       } else if (node.type === 'code_block' && node.children) {
-        return node.children.map((child: any) => child.text || '').join('');
+        return node.children.map((child) => child.text || '').join('');
       }
       return '';
     }).filter(line => line !== '').join('\n');

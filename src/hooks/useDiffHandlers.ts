@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useCallback } from 'react';
 import { type DiffBlockElement } from '@/lib/diff-plugin';
+import type { CustomEditor, CustomElement } from '@/types/editor';
 
-export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
+export function useDiffHandlers(editorRef: React.MutableRefObject<CustomEditor | null>) {
   const onAccept = useCallback((element: DiffBlockElement) => {
     try {
       const currentEditor = editorRef.current;
@@ -9,7 +11,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
       
       // Find the element in the editor
       let elementPath: number[] | null = null;
-      currentEditor.children.forEach((node: any, index: number) => {
+      currentEditor.children.forEach((node: CustomElement, index: number) => {
         if (node === element) {
           elementPath = [index];
         }
@@ -22,7 +24,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
       // First, find and remove the lines that match the deletions
       if (hunk.deletions.length > 0) {
         // Search for the context or deletion lines before the diff block
-        let searchStartIndex = Math.max(0, elementPath[0] - 10); // Look up to 10 lines before
+        const searchStartIndex = Math.max(0, elementPath[0] - 10); // Look up to 10 lines before
         let foundDeletionStart = -1;
         let isInlineReplacement = false;
         let inlineNodeIndex = -1;
@@ -30,7 +32,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
         for (let i = searchStartIndex; i < elementPath[0]; i++) {
           const node = currentEditor.children[i];
           if (node && node.type === 'p' && node.children) {
-            const nodeText = node.children.map((child: any) => child.text || '').join('');
+            const nodeText = node.children.map((child) => child.text || '').join('');
             const firstDeletion = hunk.deletions[0].trim();
             
             // Check for exact match (full line replacement)
@@ -51,7 +53,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
           // Handle inline replacement within a single paragraph
           const node = currentEditor.children[inlineNodeIndex];
           if (node && node.type === 'p' && node.children) {
-            const nodeText = node.children.map((child: any) => child.text || '').join('');
+            const nodeText = node.children.map((child) => child.text || '').join('');
             
             // Apply all replacements
             let newText = nodeText;
@@ -61,7 +63,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
               newText = nodeText.replace(deletionText, additionText);
               
               // Update the node with the new text
-              currentEditor.apply({
+              (currentEditor as any).apply({
                 type: 'set_node',
                 path: [inlineNodeIndex],
                 properties: {},
@@ -71,7 +73,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
               });
               
               // Remove the diff block
-              currentEditor.apply({
+              (currentEditor as any).apply({
                 type: 'remove_node',
                 path: elementPath,
                 node: element,
@@ -87,11 +89,11 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
             if (nodeIndex < currentEditor.children.length) {
               const node = currentEditor.children[nodeIndex];
               if (node && node.type === 'p' && node.children) {
-                const nodeText = node.children.map((child: any) => child.text || '').join('').trim();
+                const nodeText = node.children.map((child) => child.text || '').join('').trim();
                 const deletionText = hunk.deletions[i].trim();
                 
                 if (nodeText === deletionText) {
-                  currentEditor.apply({
+                  (currentEditor as any).apply({
                     type: 'remove_node',
                     path: [nodeIndex],
                     node: node,
@@ -107,11 +109,11 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
           }
           
           // Now remove the diff block itself
-          currentEditor.apply({
-            type: 'remove_node',
-            path: elementPath,
-            node: element,
-          });
+          (currentEditor as any).apply({
+                type: 'remove_node',
+                path: elementPath,
+                node: element,
+              });
           
           // Insert the additions at the position where deletions were
           hunk.additions.forEach((line, index) => {
@@ -120,7 +122,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
               children: [{ text: line }]
             };
             
-            currentEditor.apply({
+            (currentEditor as any).apply({
               type: 'insert_node',
               path: [foundDeletionStart + index],
               node: newNode,
@@ -132,11 +134,11 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
       }
       
       // If no deletions or couldn't find them, just remove diff block and insert additions
-      currentEditor.apply({
-        type: 'remove_node',
-        path: elementPath,
-        node: element,
-      });
+      (currentEditor as any).apply({
+                type: 'remove_node',
+                path: elementPath,
+                node: element,
+              });
       
       // Insert the accepted changes as new paragraphs
       hunk.additions.forEach((line, index) => {
@@ -145,7 +147,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
           children: [{ text: line }]
         };
         
-        currentEditor.apply({
+        (currentEditor as any).apply({
           type: 'insert_node',
           path: [elementPath![0] + index],
           node: newNode,
@@ -163,18 +165,18 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
       
       // Find the element in the editor
       let elementPath: number[] | null = null;
-      currentEditor.children.forEach((node: any, index: number) => {
+      currentEditor.children.forEach((node: CustomElement, index: number) => {
         if (node === element) {
           elementPath = [index];
         }
       });
       
       if (elementPath) {
-        currentEditor.apply({
-          type: 'remove_node',
-          path: elementPath,
-          node: element,
-        });
+        (currentEditor as any).apply({
+                type: 'remove_node',
+                path: elementPath,
+                node: element,
+              });
       }
     } catch (error) {
       console.error('Error rejecting diff:', error);
@@ -182,7 +184,7 @@ export function useDiffHandlers(editorRef: React.MutableRefObject<any>) {
   }, [editorRef]);
 
   // Attach handlers to editor
-  const attachHandlers = (editor: any) => {
+  const attachHandlers = (editor: CustomEditor) => {
     if (editor) {
       editor.diffHandlers = {
         onAccept,

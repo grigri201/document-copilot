@@ -5,9 +5,10 @@ import { Plate } from 'platejs/react';
 import { Editor, EditorContainer } from '@/components/ui/editor';
 import { FloatingInputBar } from '@/components/floating-input-bar';
 import { EditorToolbar } from '@/components/editor-toolbar';
+import type { CustomEditor } from '@/types/editor';
 
 interface EditorLayoutProps {
-  editor: any;
+  editor: CustomEditor;
   onAsk: (question: string) => void;
   onPaste: () => void;
   placeholder?: string;
@@ -24,7 +25,8 @@ export function EditorLayout({
   return (
     <div className="flex flex-col h-screen w-full">
       <EditorToolbar onPaste={onPaste} />
-      <Plate editor={editor}>
+      {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+      <Plate editor={editor as any}>
         <EditorContainer className="flex-1 overflow-auto pb-20">
           <Editor placeholder={placeholder} />
           {children}

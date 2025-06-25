@@ -2,9 +2,11 @@ import { useCallback } from 'react';
 import { parseDiff } from '@/lib/diff-parser';
 import { ELEMENT_DIFF_BLOCK } from '@/lib/diff-plugin';
 import { generatePrompt } from '@/lib/prompts';
+import type { CustomEditor, CustomElement } from '@/types/editor';
+import type { DiffBlockElement } from '@/types/diff';
 
 interface UseClipboardHandlersOptions {
-  editorRef: React.MutableRefObject<any>;
+  editorRef: React.MutableRefObject<CustomEditor | null>;
   getContent: () => string;
   openAIUrl?: string;
 }
@@ -36,15 +38,15 @@ export function useClipboardHandlers({
       }
       
       // Get the current editor instance
-      const currentEditor = editorRef.current;
-      if (!currentEditor) {
+      if (!editorRef.current) {
         console.error('Editor not initialized');
         return;
       }
+      const currentEditor = editorRef.current;
       
       // Insert diff blocks at the appropriate position in the document
       hunks.forEach((hunk) => {
-        const diffBlock = {
+        const diffBlock: DiffBlockElement = {
           type: ELEMENT_DIFF_BLOCK,
           hunk,
           children: [{ text: '' }],
@@ -59,9 +61,9 @@ export function useClipboardHandlers({
         if (hunk.deletions.length === 0 && hunk.contextBefore.length > 0) {
           const contextBeforeLine = hunk.contextBefore[hunk.contextBefore.length - 1].trim();
           
-          currentEditor.children.forEach((node: any, index: number) => {
+          currentEditor.children.forEach((node: CustomElement, index: number) => {
             if (node.type === 'p' && node.children) {
-              const nodeText = node.children.map((child: any) => child.text || '').join('').trim();
+              const nodeText = node.children.map((child) => child.text || '').join('').trim();
               if (nodeText === contextBeforeLine) {
                 // This is a pure insertion - position after the context before line
                 insertPath = [index + 1];
@@ -75,9 +77,9 @@ export function useClipboardHandlers({
           if (hunk.deletions.length > 0) {
             const firstDeletion = hunk.deletions[0].trim();
             
-            currentEditor.children.forEach((node: any, index: number) => {
+            currentEditor.children.forEach((node: CustomElement, index: number) => {
               if (node.type === 'p' && node.children) {
-                const nodeText = node.children.map((child: any) => child.text || '').join('');
+                const nodeText = node.children.map((child) => child.text || '').join('');
                 
                 // Check for inline replacement (deletion text is part of a larger line)
                 if (nodeText.includes(firstDeletion) && nodeText.trim() !== firstDeletion) {
@@ -97,9 +99,9 @@ export function useClipboardHandlers({
           if (insertPath[0] === currentEditor.children.length && hunk.contextBefore.length > 0) {
             const contextLine = hunk.contextBefore[hunk.contextBefore.length - 1].trim();
             
-            currentEditor.children.forEach((node: any, index: number) => {
+            currentEditor.children.forEach((node: CustomElement, index: number) => {
               if (node.type === 'p' && node.children) {
-                const nodeText = node.children.map((child: any) => child.text || '').join('');
+                const nodeText = node.children.map((child) => child.text || '').join('');
                 if (nodeText.includes(contextLine)) {
                   // Insert after the context line
                   insertPath = [index + 1];
@@ -113,7 +115,7 @@ export function useClipboardHandlers({
         if (foundInlineMatch && matchingNodeIndex !== -1) {
           const node = currentEditor.children[matchingNodeIndex];
           if (node.type === 'p' && node.children) {
-            const nodeText = node.children.map((child: any) => child.text || '').join('');
+            const nodeText = node.children.map((child) => child.text || '').join('');
             
             // Apply the inline replacement
             let newText = nodeText;
@@ -123,7 +125,8 @@ export function useClipboardHandlers({
               newText = nodeText.replace(deletionText, additionText);
               
               // Update the node with the new text
-              currentEditor.apply({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              (currentEditor as any).apply({
                 type: 'set_node',
                 path: [matchingNodeIndex],
                 properties: {},
@@ -138,7 +141,8 @@ export function useClipboardHandlers({
           }
         }
         
-        currentEditor.apply({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (currentEditor as any).apply({
           type: 'insert_node',
           path: insertPath,
           node: diffBlock,
