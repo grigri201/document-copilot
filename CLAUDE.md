@@ -45,12 +45,29 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 6. Diff blocks render as interactive elements with accept/reject buttons
 7. Accepted changes are applied inline to the document
 
-### Key Components and Files
-- `/src/app/page.tsx` - Main editor page with state management
+### Key Components and Architecture
+
+#### Pages (Refactored)
+- `/src/app/page.tsx` - Main editor page (29 lines, uses hooks)
+- `/src/app/demo/page.tsx` - Demo page with sample content (54 lines, uses hooks)
+
+#### Custom Hooks (New)
+- `/src/hooks/useDocumentEditor.ts` - Manages editor state, initialization, and content extraction
+- `/src/hooks/useDiffHandlers.ts` - Handles diff acceptance/rejection logic
+- `/src/hooks/useClipboardHandlers.ts` - Manages clipboard operations and AI integration
+
+#### Layout Components (New)
+- `/src/components/layouts/EditorLayout.tsx` - Common UI layout for editor pages
+
+#### Core Components
 - `/src/components/diff-block.tsx` - Renders diff changes with accept/reject UI
 - `/src/components/editor-toolbar.tsx` - Toolbar with paste functionality for diffs
+- `/src/components/floating-input-bar.tsx` - Input interface for AI questions
+
+#### Library Files
 - `/src/lib/diff-plugin.tsx` - Plate.js plugin for diff block rendering
 - `/src/lib/diff-parser.ts` - Parses unified diff format into structured data
+- `/src/lib/prompts.ts` - Generates structured prompts for AI interactions
 
 ### Important Patterns
 1. **Component Styling**: Use the `cn()` utility from `@/lib/utils` for merging classNames
@@ -63,7 +80,8 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 - Configured with markdown shortcuts, code blocks, and basic formatting plugins
 - Custom diff block plugin for rendering suggested changes
 - Two editor variants: dynamic (`editor.tsx`) and static (`editor-static.tsx`)
-- Editor state managed in the main page component
+- Editor state managed through `useDocumentEditor` hook
+- Diff handlers attached via `useDiffHandlers` hook
 
 ### Development Notes
 - The project uses Turbopack for faster development builds
@@ -71,3 +89,16 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 - ESLint 9 with Next.js rules for code quality
 - All components are client-side rendered (`'use client'` directive)
 - Font optimization with Geist Sans and Geist Mono from next/font
+
+### Current Technical Debt
+- 27 TypeScript `any` type violations (mostly in hooks and diff handling)
+- Error handling uses `alert()` and `console.error()` - needs proper toast notifications
+- Complex diff acceptance logic needs further decomposition
+- State management uses patterns like `(editor as any).diffHandlers` that need improvement
+
+### Refactoring Status
+The codebase recently underwent major refactoring to eliminate code duplication:
+- Extracted shared editor logic into reusable hooks
+- Reduced page components by ~90% (from 382/437 lines to 29/54 lines)
+- Created single source of truth for editor functionality
+- See `refactor.md` for complete refactoring plan and progress
