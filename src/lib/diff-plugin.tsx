@@ -1,8 +1,8 @@
-import { createPlatePlugin } from 'platejs/react';
+import { createPlatePlugin } from '@udecode/plate-core/react';
 import { DiffBlock } from '@/components/diff-block';
 import type { DiffHunk } from './diff-parser';
 import type { PlateRenderElementProps } from '@/types/editor';
-import type { TElement } from '@udecode/plate-common';
+import type { TElement } from '@udecode/plate-core';
 
 export const ELEMENT_DIFF_BLOCK = 'diff-block' as const;
 

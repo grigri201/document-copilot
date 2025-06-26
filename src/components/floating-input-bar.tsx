@@ -6,16 +6,24 @@ import { Input } from '@/components/ui/input';
 
 interface FloatingInputBarProps {
   onAsk: (question: string) => void;
+  onPaste: () => void;
 }
 
-export function FloatingInputBar({ onAsk }: FloatingInputBarProps) {
+export function FloatingInputBar({ onAsk, onPaste }: FloatingInputBarProps) {
   const [question, setQuestion] = useState('');
+  const hasContent = question.trim().length > 0;
 
   const handleAsk = () => {
-    if (question.trim()) {
+    if (hasContent) {
       onAsk(question);
-      setQuestion('');
+      // Don't clear input after submit
     }
+  };
+
+  const handlePaste = () => {
+    onPaste();
+    // Clear input after paste
+    setQuestion('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -37,9 +45,16 @@ export function FloatingInputBar({ onAsk }: FloatingInputBarProps) {
         />
         <Button 
           onClick={handleAsk}
-          disabled={!question.trim()}
+          disabled={!hasContent}
         >
           Ask
+        </Button>
+        <Button 
+          onClick={handlePaste}
+          disabled={!hasContent}
+          variant="outline"
+        >
+          Paste
         </Button>
       </div>
     </div>

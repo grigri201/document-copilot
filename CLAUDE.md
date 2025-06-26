@@ -46,22 +46,29 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 - **Tailwind CSS v4** using PostCSS plugin approach
 - **shadcn/ui** component library (new-york style, neutral colors)
 - **Plate.js** for rich text editing with Slate.js foundation
+- **@udecode/plate-*@49.0.0** packages for editor plugins (basic marks, code blocks, markdown)
+- **react-markdown** with **react-syntax-highlighter** for GitHub-style markdown preview
 
 ### Core Application Flow
 1. User writes in the Plate.js editor (supports markdown, code blocks, basic formatting)
 2. User asks questions via the floating input bar (`floating-input-bar.tsx`)
-3. App generates a prompt with document content and question (copies to clipboard)
+3. App generates a prompt with document content and question using `lib/prompts.ts` (copies to clipboard)
 4. User pastes AI-generated diff response back into the editor toolbar
 5. Diff parser (`lib/diff-parser.ts`) processes unified diff format
 6. Diff blocks render as interactive elements with accept/reject buttons
-7. Accepted changes are applied inline to the document
+7. Accepted changes are applied inline to the document via `lib/diff-operations.ts`
 
-### Key Components and Files
-- `/src/app/page.tsx` - Main editor page with state management
-- `/src/components/diff-block.tsx` - Renders diff changes with accept/reject UI
-- `/src/components/editor-toolbar.tsx` - Toolbar with paste functionality for diffs
-- `/src/lib/diff-plugin.tsx` - Plate.js plugin for diff block rendering
-- `/src/lib/diff-parser.ts` - Parses unified diff format into structured data
+### Key Features
+- **Auto-save**: Uses localStorage with 30-second intervals (`hooks/useAutoSave.ts`)
+- **Preview Mode**: Toggle between edit and GitHub-style markdown preview
+- **Clear Function**: Removes all content and localStorage with confirmation dialog
+- **Demo Page**: Available at `/demo` with pre-populated markdown examples
+
+### State Management
+- **Editor State**: Managed through `hooks/useDocumentEditor.ts` using Plate.js
+- **Diff Handlers**: Managed through `hooks/useDiffHandlers.ts` for accept/reject operations
+- **Clipboard Operations**: Handled by `hooks/useClipboardHandlers.ts`
+- **Preview Mode**: Local state in page components, toggled via toolbar
 
 ### Important Patterns
 1. **Component Styling**: Use the `cn()` utility from `@/lib/utils` for merging classNames
@@ -69,12 +76,20 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 3. **Editor State**: All editor functionality is client-side only (no backend/API)
 4. **Diff Integration**: Diffs are void elements in the Plate.js editor tree
 5. **Clipboard Workflow**: Uses clipboard for AI interaction (copy prompt, paste response)
+6. **Type Definitions**: Custom editor types defined in `types/editor.ts`
 
-### Plate.js Editor Configuration
-- Configured with markdown shortcuts, code blocks, and basic formatting plugins
-- Custom diff block plugin for rendering suggested changes
-- Two editor variants: dynamic (`editor.tsx`) and static (`editor-static.tsx`)
-- Editor state managed in the main page component
+### Prompt Engineering
+The `lib/prompts.ts` file contains the prompt template that instructs the AI to:
+- Return unified diff format only
+- Include exactly one context line above and below changes
+- Add appropriate blank lines for readability
+- Preserve document formatting patterns
+
+### UI Components Structure
+- **Editor Components**: Located in `components/ui/` (editor.tsx, button.tsx, etc.)
+- **Layout Components**: Located in `components/layouts/` (EditorLayout.tsx)
+- **Feature Components**: In `components/` root (diff-block.tsx, floating-input-bar.tsx, etc.)
+- All UI components use `'use client'` directive for client-side rendering
 
 ### Development Notes
 - The project uses Turbopack for faster development builds
@@ -82,3 +97,4 @@ Document Copilot is an AI-assisted document editor built with Next.js 15. It all
 - ESLint 9 with Next.js rules for code quality
 - All components are client-side rendered (`'use client'` directive)
 - Font optimization with Geist Sans and Geist Mono from next/font
+- Storage key for auto-save: `document-copilot-content`

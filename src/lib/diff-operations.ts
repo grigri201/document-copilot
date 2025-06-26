@@ -1,3 +1,4 @@
+import { Transforms } from 'slate';
 import type { CustomEditor, CustomElement } from '@/types/editor';
 import type { DiffHunk } from './diff-parser';
 
@@ -61,15 +62,26 @@ export function applyInlineReplacement(
     const nodeText = node.children.map((child) => child.text || '').join('');
     const updatedText = nodeText.replace(oldText, newText);
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (editor as any).apply({
-      type: 'set_node',
-      path: [nodeIndex],
-      properties: {},
-      newProperties: {
-        children: [{ text: updatedText }]
-      }
-    });
+    // Use Transforms for proper updates
+    try {
+      Transforms.setNodes(
+        editor,
+        { children: [{ text: updatedText }] },
+        { at: [nodeIndex] }
+      );
+    } catch (error) {
+      console.error('Failed to set node with Transforms:', error);
+      // Fallback to direct apply
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (editor as any).apply({
+        type: 'set_node',
+        path: [nodeIndex],
+        properties: {},
+        newProperties: {
+          children: [{ text: updatedText }]
+        }
+      });
+    }
   }
 }
 
@@ -94,12 +106,19 @@ export function removeDeletedNodes(
         const deletionText = deletions[i].trim();
         
         if (nodeText === deletionText) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          (editor as any).apply({
-            type: 'remove_node',
-            path: [nodeIndex],
-            node: node,
-          });
+          // Use Transforms for proper removal
+          try {
+            Transforms.removeNodes(editor, { at: [nodeIndex] });
+          } catch (error) {
+            console.error('Failed to remove node with Transforms:', error);
+            // Fallback to direct apply
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (editor as any).apply({
+              type: 'remove_node',
+              path: [nodeIndex],
+              node: node,
+            });
+          }
           
           // Adjust the elementPath since we removed a node before it
           if (nodeIndex < updatedElementPath[0]) {
@@ -121,12 +140,19 @@ export function removeDiffBlock(
   elementPath: number[],
   element: CustomElement
 ): void {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (editor as any).apply({
-    type: 'remove_node',
-    path: elementPath,
-    node: element,
-  });
+  // Use Transforms for proper removal
+  try {
+    Transforms.removeNodes(editor, { at: elementPath });
+  } catch (error) {
+    console.error('Failed to remove diff block with Transforms:', error);
+    // Fallback to direct apply
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (editor as any).apply({
+      type: 'remove_node',
+      path: elementPath,
+      node: element,
+    });
+  }
 }
 
 /**
@@ -143,12 +169,19 @@ export function insertAdditions(
       children: [{ text: line }]
     };
     
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (editor as any).apply({
-      type: 'insert_node',
-      path: [path[0] + index],
-      node: newNode,
-    });
+    // Use Transforms for proper insertion
+    try {
+      Transforms.insertNodes(editor, newNode, { at: [path[0] + index] });
+    } catch (error) {
+      console.error('Failed to insert node with Transforms:', error);
+      // Fallback to direct apply
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (editor as any).apply({
+        type: 'insert_node',
+        path: [path[0] + index],
+        node: newNode,
+      });
+    }
   });
 }
 

@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Transforms } from 'slate';
 import { parseDiff } from '@/lib/diff-parser';
 import { ELEMENT_DIFF_BLOCK } from '@/lib/diff-plugin';
 import { generatePrompt } from '@/lib/prompts';
@@ -141,12 +142,28 @@ export function useClipboardHandlers({
           }
         }
         
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (currentEditor as any).apply({
-          type: 'insert_node',
-          path: insertPath,
-          node: diffBlock,
-        });
+        // Insert the diff block using Slate Transforms
+        
+        try {
+          // Use Transforms API for proper node insertion
+          Transforms.insertNodes(currentEditor, diffBlock, { at: insertPath });
+        } catch (error) {
+          console.error('Error inserting node with Transforms:', error);
+          // Try alternative insertion method
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (currentEditor as any).insertNode(diffBlock, { at: insertPath });
+          } catch (altError) {
+            console.error('Alternative insertion also failed:', altError);
+            // Last resort: direct apply
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (currentEditor as any).apply({
+              type: 'insert_node',
+              path: insertPath,
+              node: diffBlock,
+            });
+          }
+        }
       });
     } catch (error) {
       console.error('Failed to read clipboard:', error);

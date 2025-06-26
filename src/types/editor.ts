@@ -1,4 +1,4 @@
-import type { TText, TElement } from '@udecode/plate-common';
+import type { TText, TElement } from '@udecode/plate-core';
 import type { TPlateEditor } from '@udecode/plate-core/react';
 import { type DiffBlockElement, ELEMENT_DIFF_BLOCK } from '@/lib/diff-plugin';
 

@@ -14,6 +14,16 @@ STRICT DIFF FORMAT
    • additions         → "+"  
 3. No other commentary, headings, or fences—**only the diff lines**.
 
+CONTENT READABILITY RULES
+• When adding or modifying content, include appropriate blank lines for readability:
+  - Add blank lines between paragraphs
+  - Add blank lines before and after headings
+  - Add blank lines before and after code blocks
+  - Add blank lines before and after lists
+  - Add blank lines between distinct sections or ideas
+• Maintain consistent spacing throughout the document
+• Preserve the document's existing blank line patterns when making edits
+
 EXAMPLE  
 Before:
 A  
