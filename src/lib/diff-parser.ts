@@ -13,18 +13,33 @@ export interface DiffHunk {
 }
 
 export function parseDiff(diffText: string): DiffHunk[] {
+  console.log('=== DIFF PARSER DEBUG ===');
+  console.log('Input text:', diffText);
+  console.log('========================');
+  
   const lines = diffText.split('\n');
   const hunks: DiffHunk[] = [];
   
   let currentHunk: DiffHunk | null = null;
   let inDiff = false;
   
-  for (const line of lines) {
-    // Skip empty lines
-    if (!line.trim()) continue;
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    console.log(`Line ${i}: "${line}" (starts with: "${line[0]}")`);
     
-    // Check if line starts with diff markers
-    if (line.startsWith('-') && !line.startsWith('---')) {
+    // Skip empty lines and @@ markers
+    if (!line.trim() || line.trim() === '@@') {
+      console.log('  -> Skipping empty or @@ line');
+      continue;
+    }
+    
+    // Trim leading spaces and check for diff markers
+    const trimmedLine = line.trimStart();
+    const leadingSpaces = line.length - trimmedLine.length;
+    
+    // Check if line starts with diff markers (after trimming leading spaces)
+    if (trimmedLine.startsWith('-') && !trimmedLine.startsWith('---')) {
+      console.log('  -> Detected deletion line');
       if (!currentHunk) {
         currentHunk = {
           contextBefore: [],
@@ -35,8 +50,10 @@ export function parseDiff(diffText: string): DiffHunk[] {
         };
       }
       inDiff = true;
-      currentHunk.deletions.push(line.substring(1));
-    } else if (line.startsWith('+') && !line.startsWith('+++')) {
+      // Preserve the indentation by keeping the leading spaces
+      currentHunk.deletions.push(' '.repeat(leadingSpaces) + trimmedLine.substring(1));
+    } else if (trimmedLine.startsWith('+') && !trimmedLine.startsWith('+++')) {
+      console.log('  -> Detected addition line');
       if (!currentHunk) {
         currentHunk = {
           contextBefore: [],
@@ -47,9 +64,39 @@ export function parseDiff(diffText: string): DiffHunk[] {
         };
       }
       inDiff = true;
-      currentHunk.additions.push(line.substring(1));
+      // Preserve the indentation by keeping the leading spaces
+      currentHunk.additions.push(' '.repeat(leadingSpaces) + trimmedLine.substring(1));
+    } else if (line.startsWith(' ') || line.startsWith('*')) {
+      // Context line (can start with space or asterisk)
+      const contextLine = line.startsWith('*') ? line.substring(1).trimStart() : line.substring(1);
+      console.log('  -> Detected context line');
+      
+      if (currentHunk) {
+        if (inDiff) {
+          // This is context after the diff
+          currentHunk.contextAfter.push(contextLine);
+          // If we have enough context (just 1 line), finalize this hunk
+          if (currentHunk.contextAfter.length >= 1) {
+            hunks.push(currentHunk);
+            currentHunk = null;
+            inDiff = false;
+          }
+        } else {
+          // This is context before the diff
+          currentHunk.contextBefore.push(contextLine);
+        }
+      } else if (contextLine.trim()) {
+        // Start a new hunk with context
+        currentHunk = {
+          contextBefore: [contextLine],
+          deletions: [],
+          additions: [],
+          contextAfter: [],
+          startLine: 0
+        };
+      }
     } else {
-      // Context line or end of diff
+      // Unknown line format - treat as context if we're in a hunk
       if (currentHunk) {
         if (inDiff) {
           // This is context after the diff
@@ -81,6 +128,18 @@ export function parseDiff(diffText: string): DiffHunk[] {
   if (currentHunk && (currentHunk.deletions.length > 0 || currentHunk.additions.length > 0)) {
     hunks.push(currentHunk);
   }
+  
+  console.log('=== PARSED HUNKS ===');
+  console.log('Total hunks:', hunks.length);
+  hunks.forEach((hunk, index) => {
+    console.log(`Hunk ${index}:`, {
+      contextBefore: hunk.contextBefore,
+      deletions: hunk.deletions,
+      additions: hunk.additions,
+      contextAfter: hunk.contextAfter
+    });
+  });
+  console.log('==================');
   
   return hunks;
 }

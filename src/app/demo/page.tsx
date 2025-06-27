@@ -13,96 +13,74 @@ import remarkHtml from 'remark-html';
 import type { CustomValue } from '@/types/editor';
 import type { DiffHunk } from '@/types/diff';
 
-const DEMO_CONTENT = `# Document Copilot Demo
+const DEMO_CONTENT = `# 记单词 WebApp 功能模板
 
-This is a **demonstration** of the markdown preview with GitHub-style rendering.
+## 1. 用户管理
+- 注册/登录（邮箱、第三方）
+- 个人资料
+- 学习进度同步
 
-## Features
+## 2. 单词库管理
+- 预置词表选择（例如 CET4、GRE）
+- 自定义单词本
+- 导入/导出（CSV、Excel）
 
-The editor supports various markdown elements:
+## 3. 学习模式
+- **闪卡**（正面: 单词，背面: 释义/例句）
+- **拼写测试**（听写、填空）
+- **选择题**（同义/反义词）
+- **例句填空**
 
-### Text Formatting
+## 4. 记忆算法
+- 基于 **Spaced Repetition（间隔重复）** 算法
+- 学习阶段（新词、熟悉、巩固、掌握）
+- 自动生成每日复习列表
 
-- **Bold text** for emphasis
-- *Italic text* for subtle emphasis
-- ~~Strikethrough~~ for deleted content
-- \`inline code\` for code snippets
-- Keyboard shortcuts like <kbd>Ctrl</kbd> + <kbd>S</kbd>
+## 5. 统计与反馈
+- 每日/每周学习记录
+- 记忆曲线可视化
+- 词汇掌握度评分
 
-### Lists
+## 6. 设置与个性化
+- 每日目标（新词量/复习量）
+- 通知提醒（邮件/推送）
+- 主题模式（浅色/深色）
+- 语言设置
 
-#### Unordered Lists
-- First item
-- Second item
-  - Nested item
-  - Another nested item
-- Third item
+## 7. 多端支持
+- 响应式 Web
+- PWA 离线功能
+- 数据同步（本地缓存 + 云端）
 
-#### Ordered Lists
-1. First step
-2. Second step
-   1. Sub-step A
-   2. Sub-step B
-3. Third step
+## 8. 辅助功能
+- 发音（TTS）
+- 例句与词根词缀
+- 生词本一键重学
+- 学习排行榜/成就徽章
 
-#### Task Lists
-- [x] Completed task
-- [ ] Pending task
-- [ ] Another pending task
+## 9. 后台管理（可选）
+- 词库维护
+- 用户统计
+- 内容审核`;
 
-### Code Blocks
+// Test diff examples
+const TEST_DIFF_1 = `## 1. 用户管理
+  -- 注册/登录（邮箱、第三方）
+  +- 无需注册登录，打开即用
+   - 个人资料`;
 
-\`\`\`javascript
-function greet(name) {
-  console.log(\`Hello, \${name}!\`);
-  return true;
-}
-\`\`\`
+const TEST_DIFF_2 = ` ## 1. 用户管理
+-- 注册/登录（邮箱、第三方）
++- 无需注册登录，打开即用
+ - 个人资料`;
 
-\`\`\`python
-def calculate_sum(a, b):
-    """Calculate the sum of two numbers."""
-    return a + b
-\`\`\`
-
-### Blockquotes
-
-> This is a blockquote. It can contain multiple lines
-> and even **formatted text**.
-
-### Tables
-
-| Feature | Status | Notes |
-|---------|--------|-------|
-| Markdown Parsing | ✅ Complete | Using remark |
-| Syntax Highlighting | ✅ Complete | Using Prism |
-| GitHub Styles | ✅ Complete | Custom CSS |
-| Dark Mode | ✅ Complete | Auto-detect |
-
-### Links and Images
-
-Here's a [link to GitHub](https://github.com) and some text.
-
-### Horizontal Rule
-
-Above the line
-
----
-
-Below the line
-
-## Story Example
-
-今天也是和平的一天，飞天小女警要去上学了。清晨阳光透过窗帘，把木质课桌镀上一层金边。
-
-花花抱着科学书，泡泡踮脚塞储物柜，毛毛绕操场飞两圈才落地。`;
-
-const DEMO_DIFF = `-刚坐定，警报器尖锐响起——恶霸猴闯入市政厅偷市长的午餐券。她们对视一眼，书包还没放好便旋转变身。
-+刚坐定，警报器尖锐响起——恶霸猴闯入市政厅偷市长的午餐券。那是一只狡猾灵活的改造猴，披着破斗篷，眼里闪烁着诡计的光。她们对视一眼，书包还没放好便旋转变身。`;
-
-const DEMO_INSERTION_DIFF = `花花抱着科学书，泡泡踮脚塞储物柜，毛毛绕操场飞两圈才落地。
-+教室里充满了早晨的活力，同学们三三两两地聊着天。
-刚坐定，警报器尖锐响起——恶霸猴闯入市政厅偷市长的午餐券。她们对视一眼，书包还没放好便旋转变身。`;
+const TEST_DIFF_3 = ` - 学习排行榜/成就徽章
++
++## 9. 使用流程
++- 复制任意英文内容，粘贴到输入框
++- 点击 **开始** 按钮
++- 系统按句号自动分句，并在每句下方显示中文翻译
+ ## 9. 后台管理（可选）`;
 
 export default function DemoPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(true);
@@ -124,12 +102,6 @@ export default function DemoPage() {
   useEffect(() => {
     attachHandlers(editor);
   }, [editor, attachHandlers]);
-
-  // Auto-paste demo diffs on load (optional - you can remove this if not needed)
-  useEffect(() => {
-    // You could add buttons to trigger these demo diffs instead
-    console.log('Demo diffs available:', { DEMO_DIFF, DEMO_INSERTION_DIFF });
-  }, []);
 
   // Clear handler that just resets to demo content
   const handleClear = () => {
@@ -225,20 +197,58 @@ export default function DemoPage() {
       });
   }, [getContent]);
 
+  // Test diff parsing
+  const testDiffParsing = useCallback((diffText: string, testName: string) => {
+    console.log(`\n=== Testing: ${testName} ===`);
+    navigator.clipboard.writeText(diffText).then(() => {
+      console.log('Diff copied to clipboard, triggering paste...');
+      if (isPreviewMode) {
+        handlePreviewPaste();
+      } else {
+        handlePaste();
+      }
+    });
+  }, [isPreviewMode, handlePreviewPaste, handlePaste]);
+
   return (
-    <EditorLayout 
-      editor={editor}
-      onAsk={handleAsk}
-      onPaste={currentPasteHandler}
-      onClear={handleClear}
-      onTogglePreview={handleTogglePreview}
-      isPreviewMode={isPreviewMode}
-      content={getContent()}
-      previewDiffs={previewDiffs}
-      onPreviewDiffAccept={handlePreviewDiffAccept}
-      onPreviewDiffReject={handlePreviewDiffReject}
-      onDownload={handleDownload}
-      onCopy={handleCopy}
-    />
+    <>
+      <EditorLayout 
+        editor={editor}
+        onAsk={handleAsk}
+        onPaste={currentPasteHandler}
+        onClear={handleClear}
+        onTogglePreview={handleTogglePreview}
+        isPreviewMode={isPreviewMode}
+        content={getContent()}
+        previewDiffs={previewDiffs}
+        onPreviewDiffAccept={handlePreviewDiffAccept}
+        onPreviewDiffReject={handlePreviewDiffReject}
+        onDownload={handleDownload}
+        onCopy={handleCopy}
+      />
+      
+      {/* Test diff buttons */}
+      <div className="fixed bottom-24 right-4 flex flex-col gap-2 p-4 bg-background border rounded-lg shadow-lg">
+        <h3 className="text-sm font-semibold mb-2">Test Diff Parsing</h3>
+        <button
+          onClick={() => testDiffParsing(TEST_DIFF_1, 'LLM Format (with leading spaces)')}
+          className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Test LLM Format
+        </button>
+        <button
+          onClick={() => testDiffParsing(TEST_DIFF_2, 'Standard Format')}
+          className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
+        >
+          Test Standard Format
+        </button>
+        <button
+          onClick={() => testDiffParsing(TEST_DIFF_3, 'Multiple Additions')}
+          className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
+        >
+          Test Multiple Changes
+        </button>
+      </div>
+    </>
   );
 }
