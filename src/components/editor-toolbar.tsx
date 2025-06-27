@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@/components/ui/button';
-import { ClipboardPaste, Trash2, Eye, Edit } from 'lucide-react';
+import { Trash2, Eye, Edit, Download, Copy } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,27 +15,17 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface EditorToolbarProps {
-  onPaste: () => void;
   onClear: () => void;
   onTogglePreview: () => void;
   isPreviewMode: boolean;
+  onDownload?: () => void;
+  onCopy?: () => void;
 }
 
-export function EditorToolbar({ onPaste, onClear, onTogglePreview, isPreviewMode }: EditorToolbarProps) {
+export function EditorToolbar({ onClear, onTogglePreview, isPreviewMode, onDownload, onCopy }: EditorToolbarProps) {
   return (
     <div className="border-b bg-background p-2 flex items-center justify-between">
       <div className="flex items-center gap-2">
-        <Button
-          onClick={onPaste}
-          variant="outline"
-          size="sm"
-          className="gap-2"
-          disabled={isPreviewMode}
-        >
-          <ClipboardPaste className="h-4 w-4" />
-          Paste Diff
-        </Button>
-        
         <Button
           onClick={onTogglePreview}
           variant="outline"
@@ -56,17 +46,40 @@ export function EditorToolbar({ onPaste, onClear, onTogglePreview, isPreviewMode
         </Button>
       </div>
       
-      <AlertDialog>
-        <AlertDialogTrigger asChild>
+      <div className="flex items-center gap-2">
+        {isPreviewMode && onDownload && (
           <Button
+            onClick={onDownload}
             variant="outline"
             size="sm"
-            className="gap-2 text-destructive hover:text-destructive"
+            className="gap-2"
           >
-            <Trash2 className="h-4 w-4" />
-            Clear
+            <Download className="h-4 w-4" />
+            Download
           </Button>
-        </AlertDialogTrigger>
+        )}
+        {!isPreviewMode && onCopy && (
+          <Button
+            onClick={onCopy}
+            variant="outline"
+            size="sm"
+            className="gap-2"
+          >
+            <Copy className="h-4 w-4" />
+            Copy
+          </Button>
+        )}
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 text-destructive hover:text-destructive"
+            >
+              <Trash2 className="h-4 w-4" />
+              Clear
+            </Button>
+          </AlertDialogTrigger>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Clear all content?</AlertDialogTitle>
@@ -81,7 +94,8 @@ export function EditorToolbar({ onPaste, onClear, onTogglePreview, isPreviewMode
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
-      </AlertDialog>
+        </AlertDialog>
+      </div>
     </div>
   );
 }

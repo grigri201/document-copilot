@@ -6,7 +6,9 @@ import { Editor, EditorContainer } from '@/components/ui/editor';
 import { FloatingInputBar } from '@/components/floating-input-bar';
 import { EditorToolbar } from '@/components/editor-toolbar';
 import { MarkdownPreview } from '@/components/markdown-preview';
+import { PreviewWithDiffs } from '@/components/preview-with-diffs';
 import type { CustomEditor } from '@/types/editor';
+import type { DiffHunk } from '@/types/diff';
 
 interface EditorLayoutProps {
   editor: CustomEditor;
@@ -18,6 +20,11 @@ interface EditorLayoutProps {
   content: string;
   placeholder?: string;
   children?: ReactNode;
+  previewDiffs?: DiffHunk[];
+  onPreviewDiffAccept?: (hunk: DiffHunk) => void;
+  onPreviewDiffReject?: (hunk: DiffHunk) => void;
+  onDownload?: () => void;
+  onCopy?: () => void;
 }
 
 export function EditorLayout({ 
@@ -29,19 +36,34 @@ export function EditorLayout({
   isPreviewMode,
   content,
   placeholder = "Type your markdown content here...",
-  children 
+  children,
+  previewDiffs = [],
+  onPreviewDiffAccept,
+  onPreviewDiffReject,
+  onDownload,
+  onCopy
 }: EditorLayoutProps) {
   return (
     <div className="flex flex-col h-screen w-full">
       <EditorToolbar 
-        onPaste={onPaste} 
         onClear={onClear} 
         onTogglePreview={onTogglePreview}
         isPreviewMode={isPreviewMode}
+        onDownload={onDownload}
+        onCopy={onCopy}
       />
       {isPreviewMode ? (
         <div className="flex-1 overflow-auto pb-20">
-          <MarkdownPreview content={content} />
+          {previewDiffs.length > 0 && onPreviewDiffAccept && onPreviewDiffReject ? (
+            <PreviewWithDiffs 
+              content={content} 
+              diffs={previewDiffs}
+              onAccept={onPreviewDiffAccept}
+              onReject={onPreviewDiffReject}
+            />
+          ) : (
+            <MarkdownPreview content={content} />
+          )}
         </div>
       ) : (
         <>
@@ -52,9 +74,9 @@ export function EditorLayout({
               {children}
             </EditorContainer>
           </Plate>
-          <FloatingInputBar onAsk={onAsk} onPaste={onPaste} />
         </>
       )}
+      <FloatingInputBar onAsk={onAsk} onPaste={onPaste} />
     </div>
   );
 }

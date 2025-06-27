@@ -1,11 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useDocumentEditor } from '@/hooks/useDocumentEditor';
 import { useDiffHandlers } from '@/hooks/useDiffHandlers';
 import { useClipboardHandlers } from '@/hooks/useClipboardHandlers';
 import { EditorLayout } from '@/components/layouts/EditorLayout';
+import { parseDiff } from '@/lib/diff-parser';
+import { downloadAsHtml, generateHtmlDocument } from '@/lib/download-utils';
+import { remark } from 'remark';
+import remarkHtml from 'remark-html';
 import type { CustomValue } from '@/types/editor';
+import type { DiffHunk } from '@/types/diff';
 
 const DEMO_CONTENT = `# Document Copilot Demo
 
@@ -99,7 +104,8 @@ const DEMO_INSERTION_DIFF = `花花抱着科学书，泡泡踮脚塞储物柜，
 刚坐定，警报器尖锐响起——恶霸猴闯入市政厅偷市长的午餐券。她们对视一眼，书包还没放好便旋转变身。`;
 
 export default function DemoPage() {
-  const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isPreviewMode, setIsPreviewMode] = useState(true);
+  const [previewDiffs, setPreviewDiffs] = useState<DiffHunk[]>([]);
   const initialValue: CustomValue = DEMO_CONTENT.split('\n').map(line => ({
     type: 'p' as const,
     children: [{ text: line }]
@@ -138,17 +144,83 @@ export default function DemoPage() {
 
   const handleTogglePreview = () => {
     setIsPreviewMode(prev => !prev);
+    setPreviewDiffs([]);
   };
+
+  // Handle paste in preview mode
+  const handlePreviewPaste = useCallback(async () => {
+    try {
+      const clipboardText = await navigator.clipboard.readText();
+      const hunks = parseDiff(clipboardText);
+      
+      if (hunks.length === 0) {
+        alert('No valid diff found in clipboard');
+        return;
+      }
+      
+      setPreviewDiffs(hunks);
+    } catch (error) {
+      console.error('Failed to read clipboard:', error);
+      alert('Failed to read clipboard. Make sure you have copied the diff text.');
+    }
+  }, []);
+
+  // Handle diff accept/reject in preview mode
+  const handlePreviewDiffAccept = useCallback((hunk: DiffHunk) => {
+    // For demo, we don't persist changes, just remove the diff
+    setPreviewDiffs(previewDiffs.filter(d => d !== hunk));
+  }, [previewDiffs]);
+
+  const handlePreviewDiffReject = useCallback((hunk: DiffHunk) => {
+    setPreviewDiffs(previewDiffs.filter(d => d !== hunk));
+  }, [previewDiffs]);
+
+  // Use different paste handler based on mode
+  const currentPasteHandler = isPreviewMode ? handlePreviewPaste : handlePaste;
+
+  // Handle download in preview mode
+  const handleDownload = useCallback(async () => {
+    const markdownContent = getContent();
+    
+    // Convert markdown to HTML
+    const result = await remark()
+      .use(remarkHtml)
+      .process(markdownContent);
+    
+    const htmlContent = result.toString();
+    const fullHtml = generateHtmlDocument(htmlContent);
+    
+    // Download as HTML (browsers can print HTML to PDF)
+    downloadAsHtml(fullHtml, 'demo-document.html');
+  }, [getContent]);
+
+  // Handle copy in edit mode
+  const handleCopy = useCallback(() => {
+    const content = getContent();
+    navigator.clipboard.writeText(content)
+      .then(() => {
+        console.log('Content copied to clipboard');
+      })
+      .catch((err) => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy content to clipboard');
+      });
+  }, [getContent]);
 
   return (
     <EditorLayout 
       editor={editor}
       onAsk={handleAsk}
-      onPaste={handlePaste}
+      onPaste={currentPasteHandler}
       onClear={handleClear}
       onTogglePreview={handleTogglePreview}
       isPreviewMode={isPreviewMode}
       content={getContent()}
+      previewDiffs={previewDiffs}
+      onPreviewDiffAccept={handlePreviewDiffAccept}
+      onPreviewDiffReject={handlePreviewDiffReject}
+      onDownload={handleDownload}
+      onCopy={handleCopy}
     />
   );
 }
