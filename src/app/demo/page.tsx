@@ -7,6 +7,7 @@ import { useClipboardHandlers } from '@/hooks/useClipboardHandlers';
 import { EditorLayout } from '@/components/layouts/EditorLayout';
 import { parseDiff } from '@/lib/diff-parser';
 import { downloadAsHtml, generateHtmlDocument } from '@/lib/download-utils';
+import { applyDiffToText } from '@/lib/apply-diff-to-text';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
 import type { CustomValue } from '@/types/editor';
@@ -167,9 +168,26 @@ export default function DemoPage() {
 
   // Handle diff accept/reject in preview mode
   const handlePreviewDiffAccept = useCallback((hunk: DiffHunk) => {
-    // For demo, we don't persist changes, just remove the diff
+    // Apply the diff to the actual content
+    const currentContent = getContent();
+    const newContent = applyDiffToText(currentContent, hunk);
+    
+    // Update the editor content
+    if (editor && editor.children) {
+      const newLines = newContent.split('\n');
+      const newValue: CustomValue = newLines.map(line => ({
+        type: 'p' as const,
+        children: [{ text: line }]
+      }));
+      
+      editor.children = newValue;
+      if (editor.onChange && typeof editor.onChange === 'function') {
+        editor.onChange({ editor });
+      }
+    }
+    
     setPreviewDiffs(previewDiffs.filter(d => d !== hunk));
-  }, [previewDiffs]);
+  }, [previewDiffs, getContent, editor]);
 
   const handlePreviewDiffReject = useCallback((hunk: DiffHunk) => {
     setPreviewDiffs(previewDiffs.filter(d => d !== hunk));

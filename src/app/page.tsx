@@ -9,6 +9,7 @@ import { EditorLayout } from '@/components/layouts/EditorLayout';
 import { SavingIndicator } from '@/components/saving-indicator';
 import { parseDiff } from '@/lib/diff-parser';
 import { downloadAsHtml, generateHtmlDocument } from '@/lib/download-utils';
+import { applyDiffToText } from '@/lib/apply-diff-to-text';
 import { remark } from 'remark';
 import remarkHtml from 'remark-html';
 import type { DiffHunk } from '@/types/diff';
@@ -80,20 +81,9 @@ export default function MyEditorPage() {
 
   // Handle diff accept/reject in preview mode
   const handlePreviewDiffAccept = useCallback((hunk: DiffHunk) => {
-    // Apply the diff to the actual content
-    let newContent = getContent();
-    
-    if (hunk.deletions.length > 0 && hunk.additions.length > 0) {
-      hunk.deletions.forEach((deletion, index) => {
-        if (hunk.additions[index]) {
-          newContent = newContent.replace(deletion, hunk.additions[index]);
-        }
-      });
-    } else if (hunk.additions.length > 0 && hunk.contextBefore.length > 0) {
-      const contextLine = hunk.contextBefore[hunk.contextBefore.length - 1];
-      const insertIndex = newContent.indexOf(contextLine) + contextLine.length;
-      newContent = newContent.slice(0, insertIndex) + '\n' + hunk.additions.join('\n') + newContent.slice(insertIndex);
-    }
+    // Apply the diff to the actual content using the utility function
+    const currentContent = getContent();
+    const newContent = applyDiffToText(currentContent, hunk);
     
     setContent(newContent);
     setPreviewDiffs(previewDiffs.filter(d => d !== hunk));

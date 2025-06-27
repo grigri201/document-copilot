@@ -19,7 +19,7 @@ export function MarkdownPreview({ content, className }: MarkdownPreviewProps) {
   return (
     <div className={cn(
       "markdown-body max-w-none",
-      "px-16 pt-4 pb-72 sm:px-[max(64px,calc(50%-350px))]",
+      "px-16 pt-4 pb-8 sm:px-[max(64px,calc(50%-350px))]",
       // Reset first/last child margins
       "[&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
       // Base text styles
