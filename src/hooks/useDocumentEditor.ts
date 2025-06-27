@@ -56,7 +56,7 @@ export function useDocumentEditor(options: UseDocumentEditorOptions = {}) {
         return node.children.map((child) => child.text || '').join('');
       }
       return '';
-    }).filter(line => line !== '').join('\n');
+    }).join('\n');
   }, [editor]);
 
   // Set content in editor

@@ -37,8 +37,15 @@ export function parseDiff(diffText: string): DiffHunk[] {
     const trimmedLine = line.trimStart();
     const leadingSpaces = line.length - trimmedLine.length;
     
-    // Check if line starts with diff markers (after trimming leading spaces)
-    if (trimmedLine.startsWith('-') && !trimmedLine.startsWith('---')) {
+    // Check if line starts with diff markers
+    // For lines with leading spaces, look for double markers (-- or +-)
+    // to distinguish from regular markdown list items
+    const isDeletion = (leadingSpaces > 0 && trimmedLine.startsWith('--')) || 
+                       (leadingSpaces === 0 && trimmedLine.startsWith('-') && !trimmedLine.startsWith('---'));
+    const isAddition = (leadingSpaces > 0 && trimmedLine.startsWith('+-')) || 
+                       (leadingSpaces === 0 && trimmedLine.startsWith('+') && !trimmedLine.startsWith('+++'));
+    
+    if (isDeletion) {
       console.log('  -> Detected deletion line');
       if (!currentHunk) {
         currentHunk = {
@@ -50,9 +57,10 @@ export function parseDiff(diffText: string): DiffHunk[] {
         };
       }
       inDiff = true;
-      // Preserve the indentation by keeping the leading spaces
-      currentHunk.deletions.push(' '.repeat(leadingSpaces) + trimmedLine.substring(1));
-    } else if (trimmedLine.startsWith('+') && !trimmedLine.startsWith('+++')) {
+      // Remove only the first diff marker character
+      const content = trimmedLine.substring(1);
+      currentHunk.deletions.push(' '.repeat(leadingSpaces) + content);
+    } else if (isAddition) {
       console.log('  -> Detected addition line');
       if (!currentHunk) {
         currentHunk = {
@@ -64,39 +72,70 @@ export function parseDiff(diffText: string): DiffHunk[] {
         };
       }
       inDiff = true;
-      // Preserve the indentation by keeping the leading spaces
-      currentHunk.additions.push(' '.repeat(leadingSpaces) + trimmedLine.substring(1));
+      // Remove only the first diff marker character
+      const content = trimmedLine.substring(1);
+      currentHunk.additions.push(' '.repeat(leadingSpaces) + content);
     } else if (line.startsWith(' ') || line.startsWith('*')) {
-      // Context line (can start with space or asterisk)
-      const contextLine = line.startsWith('*') ? line.substring(1).trimStart() : line.substring(1);
-      console.log('  -> Detected context line');
-      
-      if (currentHunk) {
-        if (inDiff) {
-          // This is context after the diff
-          currentHunk.contextAfter.push(contextLine);
-          // If we have enough context (just 1 line), finalize this hunk
-          if (currentHunk.contextAfter.length >= 1) {
-            hunks.push(currentHunk);
-            currentHunk = null;
-            inDiff = false;
-          }
-        } else {
-          // This is context before the diff
-          currentHunk.contextBefore.push(contextLine);
+      // Check if this is actually an addition line with leading space
+      if (line.startsWith(' +') && !line.startsWith(' + ')) {
+        // This is an addition line like " +## 9. 使用流程"
+        console.log('  -> Detected addition line with leading space');
+        if (!currentHunk) {
+          currentHunk = {
+            contextBefore: [],
+            deletions: [],
+            additions: [],
+            contextAfter: [],
+            startLine: 0
+          };
         }
-      } else if (contextLine.trim()) {
-        // Start a new hunk with context
-        currentHunk = {
-          contextBefore: [contextLine],
-          deletions: [],
-          additions: [],
-          contextAfter: [],
-          startLine: 0
-        };
+        inDiff = true;
+        // Remove the space and + marker
+        const content = line.substring(2);
+        currentHunk.additions.push(content);
+      } else {
+        // Context line (can start with space or asterisk)
+        let contextLine;
+        if (line.startsWith('*')) {
+          // Remove asterisk and one space after it
+          contextLine = line.substring(1).replace(/^\s/, '');
+        } else if (line.startsWith(' ')) {
+          // Remove only the first space (context marker)
+          contextLine = line.substring(1);
+        } else {
+          contextLine = line;
+        }
+        console.log(`  -> Detected context line: "${contextLine}"`);
+        
+        if (currentHunk) {
+          if (inDiff) {
+            // This is context after the diff
+            currentHunk.contextAfter.push(contextLine);
+            // If we have enough context (just 1 line), finalize this hunk
+            if (currentHunk.contextAfter.length >= 1) {
+              hunks.push(currentHunk);
+              currentHunk = null;
+              inDiff = false;
+            }
+          } else {
+            // This is context before the diff
+            currentHunk.contextBefore.push(contextLine);
+          }
+        } else if (contextLine.trim()) {
+          // Start a new hunk with context
+          currentHunk = {
+            contextBefore: [contextLine],
+            deletions: [],
+            additions: [],
+            contextAfter: [],
+            startLine: 0
+          };
+        }
       }
     } else {
-      // Unknown line format - treat as context if we're in a hunk
+      // Any other line is treated as context
+      console.log(`  -> Treating as context line: "${line}"`);
+      
       if (currentHunk) {
         if (inDiff) {
           // This is context after the diff

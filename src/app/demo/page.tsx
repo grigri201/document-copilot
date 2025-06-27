@@ -63,24 +63,6 @@ const DEMO_CONTENT = `# 记单词 WebApp 功能模板
 - 用户统计
 - 内容审核`;
 
-// Test diff examples
-const TEST_DIFF_1 = `## 1. 用户管理
-  -- 注册/登录（邮箱、第三方）
-  +- 无需注册登录，打开即用
-   - 个人资料`;
-
-const TEST_DIFF_2 = ` ## 1. 用户管理
--- 注册/登录（邮箱、第三方）
-+- 无需注册登录，打开即用
- - 个人资料`;
-
-const TEST_DIFF_3 = ` - 学习排行榜/成就徽章
-+
-+## 9. 使用流程
-+- 复制任意英文内容，粘贴到输入框
-+- 点击 **开始** 按钮
-+- 系统按句号自动分句，并在每句下方显示中文翻译
- ## 9. 后台管理（可选）`;
 
 export default function DemoPage() {
   const [isPreviewMode, setIsPreviewMode] = useState(true);
@@ -108,7 +90,8 @@ export default function DemoPage() {
     // For demo page, we don't actually clear storage
     // Just reset to initial demo content
     if (editor && editor.children) {
-      editor.children = initialValue;
+      // Use type assertion to avoid TypeScript issues
+      editor.children = initialValue as any;
       if (editor.onChange && typeof editor.onChange === 'function') {
         editor.onChange({ editor });
       }
@@ -152,7 +135,8 @@ export default function DemoPage() {
         children: [{ text: line }]
       }));
       
-      editor.children = newValue;
+      // Use type assertion to avoid TypeScript issues
+      editor.children = newValue as any;
       if (editor.onChange && typeof editor.onChange === 'function') {
         editor.onChange({ editor });
       }
@@ -197,18 +181,6 @@ export default function DemoPage() {
       });
   }, [getContent]);
 
-  // Test diff parsing
-  const testDiffParsing = useCallback((diffText: string, testName: string) => {
-    console.log(`\n=== Testing: ${testName} ===`);
-    navigator.clipboard.writeText(diffText).then(() => {
-      console.log('Diff copied to clipboard, triggering paste...');
-      if (isPreviewMode) {
-        handlePreviewPaste();
-      } else {
-        handlePaste();
-      }
-    });
-  }, [isPreviewMode, handlePreviewPaste, handlePaste]);
 
   return (
     <>
@@ -226,29 +198,6 @@ export default function DemoPage() {
         onDownload={handleDownload}
         onCopy={handleCopy}
       />
-      
-      {/* Test diff buttons */}
-      <div className="fixed bottom-24 right-4 flex flex-col gap-2 p-4 bg-background border rounded-lg shadow-lg">
-        <h3 className="text-sm font-semibold mb-2">Test Diff Parsing</h3>
-        <button
-          onClick={() => testDiffParsing(TEST_DIFF_1, 'LLM Format (with leading spaces)')}
-          className="px-3 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
-          Test LLM Format
-        </button>
-        <button
-          onClick={() => testDiffParsing(TEST_DIFF_2, 'Standard Format')}
-          className="px-3 py-1 text-xs bg-green-500 text-white rounded hover:bg-green-600"
-        >
-          Test Standard Format
-        </button>
-        <button
-          onClick={() => testDiffParsing(TEST_DIFF_3, 'Multiple Additions')}
-          className="px-3 py-1 text-xs bg-purple-500 text-white rounded hover:bg-purple-600"
-        >
-          Test Multiple Changes
-        </button>
-      </div>
     </>
   );
 }
